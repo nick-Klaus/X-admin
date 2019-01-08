@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+  
+  <head>
+    <meta charset="UTF-8">
+    <title>欢迎页面-X-admin2.0</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="./../../css/font.css">
+    <link rel="stylesheet" href="./../../css/xadmin.css">
+    <script type="text/javascript" src="./../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="./../../lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./../../js/xadmin.js"></script>
+    <script type="text/javascript" src="./../../js/vue.js"></script>
+    <script type="text/javascript" src="./../../js/vue-resource.min.js"></script>
+  </head>
+  
+  <body>
+<div class="x-body" id="x-body">
+    <form class="layui-form">
+        <div class="layui-form-item">
+            <label for="username" class="layui-form-label">
+                <span class="x-red">*</span>姓名
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" id="username" name="username" required="" lay-verify="required"
+              autocomplete="off" class="layui-input" v-model='userData.username'>
+                <input type="hidden"  name="id" v-model='userData.id'>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label for="phone" class="layui-form-label">
+                <span class="x-red">*</span>手机
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" id="phone" name="phone" required="" lay-verify="phone"
+              autocomplete="off" class="layui-input" v-model='userData.phone'>
+            </div>
+            <div class="layui-form-mid layui-word-aux">
+                <span class="x-red">*</span>将会成为您唯一的登入名
+            </div>
+        </div>
+        <div class="layui-form-item"> 
+            <label class="layui-form-label"><span class="x-red">*</span>性别</label> <!-- checked -->
+            <div class="layui-input-block">
+                <input type="radio" name="sex" value="0"  lay-skin="primary" title="女" :checked="userData.sex==0" >
+                <input type="radio" name="sex" value="1"  lay-skin="primary" title="男" :checked="userData.sex > 0" >
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label"><span class="x-red">*</span>角色</label>
+            <div class="layui-input-block">
+                <input type="radio" name="role_id" value="1" lay-skin="primary" title="超级管理员" checked="">
+                <input type="radio" name="role_id" value="2" lay-skin="primary" title="编辑人员">
+                <input type="radio" name="role_id" value="3" lay-skin="primary" title="宣传人员" >
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label"><span class="x-red">*</span>状态</label>
+            <div class="layui-input-block">
+                <input type="radio" name="status" value="1" lay-skin="primary" title="启用" :checked="userData.status==1">
+                <input type="radio" name="status" value="0"  lay-skin="primary" title="禁用" :checked="userData.status==0">
+            </div>
+        </div>
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">备注</label>
+            <div class="layui-input-block">
+                <textarea placeholder="请输入内容" name="remark" class="layui-textarea" style="width: 300px">{{userData.remark}}</textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label for="L_repass" class="layui-form-label">
+            </label>
+            <button  class="layui-btn" lay-filter="add" lay-submit="">
+               修改
+            </button>
+        </div>
+    </form>
+</div>
+<script>
+var app = new Vue({
+    el: '#x-body',
+    data: {
+        message: '',
+        userData: {}
+    },
+    methods:{
+        getUserdata:function(edit_id){
+            var _this = this;
+            console.log('test');
+            var url = apiUrl+'Rbac/checkUser/'+edit_id;
+            var data = {
+                // id:this.edit_id,
+                // token:sessionStorage.getItem('auth_user_token')
+            };
+            _this.$http.get(url, data ,{emulateJSON:true}).then(function(response){
+                var result = response.body;
+                if( result.code !== 0 ){
+                    layer.msg(result.msg,{icon:2});
+                }
+                _this.userData = result.data
+            }, function(response){
+                if( response.status == 408 ){
+                    layer.msg(response.statusText,{icon:0});
+                } else {
+                    layer.msg('出错了',{icon:2});
+                }
+            });
+        }
+    },
+    mounted(){
+        function GetQueryString(name)
+        {
+            var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+            var r = window.location.search.substr(1).match(reg);
+            if(r!=null)return  unescape(r[2]); return null;
+        }
+        this.getUserdata(GetQueryString("id"))
+    },
+});
+
+layui.use(['form','layer'], function(){
+    $ = layui.jquery;
+    var form = layui.form
+    ,layer = layui.layer;
+    setTimeout(function() {
+        form.render();
+    },100);
+    var token = sessionStorage.getItem('auth_user_token');
+    var adminurl = apiUrl+'Rbac/updateUser';
+
+    // 监听提交
+    form.on('submit(add)', function(data){
+        var parma = data.field
+        parma.token = token;
+        $.post(adminurl,parma,function(json){
+            if( json.code === 0 ){
+                layer.msg("修改成功", {icon: 6},function(){
+                    parent.location.reload(); 
+                });
+            }else{
+                layer.msg(json.msg, {icon: 5});
+            }
+        });
+        return false;
+    });
+});
+</script>
+</body>
+</html>

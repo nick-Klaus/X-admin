@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>layui</title>
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link rel="stylesheet" href="./../../lib/layui/css/layui.css"  media="all">
+  <link rel="stylesheet" href="./../../css/font.css">
+  <link rel="stylesheet" href="./../../css/xadmin.css">
+  <script type="text/javascript" src="./../../js/jquery.min.js"></script>
+  <script type="text/javascript" src="./../../lib/layui/layui.js" charset="utf-8"></script>
+  <script type="text/javascript" src="./../../js/xadmin.js"></script>
+</head>
+<body> 
+<div class="x-nav">
+    <span class="layui-breadcrumb">
+        <a href="">首页</a>
+        <a href="">演示</a>
+        <a><cite>导航元素</cite></a>
+    </span>
+    <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right" href="javascript:location.replace(location.href);" title="刷新">
+    <i class="layui-icon" style="line-height:30px">ဂ</i></a>
+</div>
+<div class="x-body" id="x-body">
+    <div class="layui-row">
+        <form class="layui-form layui-col-md12 x-so">
+            <input type="text" class="layui-input" id="start"  placeholder="开始日" name="start">
+            <input type="text" class="layui-input" id="end"  placeholder="截止日" name="end" >
+            <input type="text" name="username"  placeholder="请输入用户名" autocomplete="off" class="layui-input">
+            <button class="layui-btn"  lay-submit="" lay-filter="demo1"><i class="layui-icon">&#xe615;</i></button>
+        </form>
+    </div>
+    <xblock>
+        <div class="layui-btn-group demoTable">
+            <button class="layui-btn layui-btn-danger" data-type="getCheckData" ><i class="layui-icon"></i>批量删除</button>
+        </div>
+        <button class="layui-btn" onclick="x_admin_show('添加用户','./admin-add.html')"><i class="layui-icon"></i>添加</button>
+    </xblock>
+    <table class="layui-hide" id="LAY_table_user"  lay-filter="demo"></table> 
+</div>
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-xs"   lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+<script src="./../../lib/layui/layui.js" charset="utf-8"></script>
+<script>
+
+layui.use(['form', 'layedit', 'laydate','table','jquery'], function(){
+    var table = layui.table;
+    var form = layui.form
+    ,layer = layui.layer
+    ,layedit = layui.layedit
+    ,laydate = layui.laydate;
+    var $= layui.jquery;
+    // 获取缓存的token
+    var token = sessionStorage.getItem('auth_user_token');
+    //日期渲染
+    laydate.render({
+        elem: '#start'
+    });
+    laydate.render({
+        elem: '#end'
+    });
+    // 获取列表的接口地址
+    var adminurl = apiUrl+'Rbac/';
+    var  x_admin_show1 = function (title,url,value,w,h){
+        if (title == null || title == '') {
+            title=false;
+        };
+        if (url == null || url == '') {
+            url="404.html";
+        };
+        if (w == null || w == '') {
+            w=($(window).width()*0.9);
+        };
+        if (h == null || h == '') {
+            h=($(window).height() - 50);
+        };
+        layer.open({
+            type: 2,
+            area: [w+'px', h +'px'],
+            fix: false, //不固定
+            maxmin: true,
+            shadeClose: true,
+            shade:0.4,
+            title: title,
+            content: url+'?id='+value
+        });
+    }
+    var index = layer.load(1, {
+      shade: [0.1,'#fff'] //0.1透明度的白色背景
+    });
+    // 渲染数据表格
+    var tableIns = table.render({
+        elem: '#LAY_table_user'
+        ,url: adminurl+'checkUsers'
+        ,method:'post'
+        ,cols: [[
+            {checkbox: true, fixed: true ,toolbar: '#bar_Demo'}
+            ,{field:'id', title: 'ID', width:80, sort: true, fixed: true}
+            ,{field:'username', title: '用户名'}
+            ,{field:'head_url', title: '头像', width:100,templet: function(d){
+                // 重新设置表格的值
+                if( d.head_url !== null ){
+                    return  '<img src="'+imgUrl+'uploads/'+d.head_url+'"/>';
+                }else{
+                    return  '';
+                }
+            }}
+            ,{field:'name', title: '角色'}
+            ,{field:'sex', title: '性别', sort: true,templet: function(d){
+                // 重新设置表格的值
+                if( d.sex === '1' ){
+                    return  '男';
+                }else{
+                    return  '女';
+                }
+            }}
+            ,{field:'phone', title: '电话'}
+            ,{field:'token', title: '令牌'}
+            ,{field:'remark', title: '备注'}
+            ,{field:'status', title: '状态', align:'center',sort: true,templet: function(d){
+                // 重新设置表格的值
+                if( d.status === '1' ){
+                    return  '<span class="layui-btn layui-btn-xs layui-btn-normal">已启用</span>';
+                }else{
+                    return  '<span class="layui-btn layui-btn-xs layui-btn-danger">未启用</span>';
+                }
+            }}
+            ,{fixed: 'right',title: '操作', width:178, align:'center', toolbar: '#barDemo'}
+        ]]
+        ,where: { //设定异步数据接口的额外参数，任意设
+            token:token
+          }
+        ,page: { //支持传入 laypage 组件的所有参数（某些参数除外，如：jump/elem） - 详见文档
+            layout: ['limit', 'count', 'prev', 'page', 'next', 'skip'] //自定义分页布局
+            //,curr: 5 //设定初始在第 5 页
+            ,groups: 1 //只显示 1 个连续页码
+            ,first: false //不显示首页
+            ,last: false //不显示尾页
+        } 
+        ,limits:[10,20,30,40,50,60,70,80,90]
+        ,done: function(res, curr, count){
+            layer.closeAll(); //疯狂模式，关闭所有层
+            // console.log(111,res)
+            // console.log(222,curr)
+            // console.log(333,count)
+            //如果是异步请求数据方式，res即为你接口返回的信息。
+            //如果是直接赋值的方式，res即为：{data: [], count: 99} data为当前页数据、count为数据总长度
+            // if( res.error_code == 300 || res.error_code == 400){
+            //     layer.msg('登录已过期', {icon: 5,time: 500},function(){
+            //         location.href='./login.html?name=admin-list.html';
+            //     });
+            // }
+        }
+        ,id:'idTest'
+        ,page: true
+        ,height: 472
+    });
+
+    // 查询后重新渲染表格数据
+    form.on('submit(demo1)', function(data){
+        var parma = data.field
+        parma.token  = token;
+        if( parma.end === "" && parma.start === "" && parma.username === ""){
+            return false;
+        }
+        console.log( parma )
+        $.post(adminurl+'checkUsers',parma,function(json){
+            if( json.code === 0 ){
+                tableIns.reload({
+                    where:parma
+                    ,page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+              });
+            }else{
+                layer.msg(json.msg, {icon: 5});
+            }
+        });
+        return false;
+    });
+    // 获取复选框的数据
+    var $ = layui.$, active = {
+        getCheckData: function(){ //获取选中数据
+            var checkStatus = table.checkStatus('idTest')
+            ,data = checkStatus.data;
+            var delArr = [];
+            if( data.length > 0 ){
+                for(var key in data){
+                    delArr.push(data[key].id);
+                }
+                var parma = {
+                    ids: delArr,
+                    token: token
+                };
+                $.post(adminurl+'delUsers',parma,function(json){
+                    if( json.code === 0 ){
+                        layer.msg('删除成功', {icon: 6},function(){
+                            // location.reload();
+                            tableIns.reload()
+                        });
+                    }else{
+                        layer.msg(json.msg, {icon: 5});
+                    }
+                });
+                return false;
+            }
+        }
+    };
+    // 获取复选框的数据
+    $('.demoTable .layui-btn').on('click', function(){
+        var type = $(this).data('type');
+        active[type] ? active[type].call(this) : '';
+    });
+
+    // 监听工具条
+    table.on('tool(demo)', function(obj){
+        var data = obj.data;
+        // 删除按钮监听
+        if(obj.event === 'del'){
+            layer.confirm('真的要删除吗？', function(index){
+                var delurl =adminurl+'delUser/'+data.id;
+                // var parma = {id:,token:token};
+                var parma = {}
+                $.get(delurl,parma,function(json){
+                    if( json.code === 0 ){
+                        obj.del()
+                        layer.msg("删除成功", {icon: 6})
+                    }else{
+                        layer.msg(json.error_msg, {icon: 5});
+                    }
+                });
+            });
+            // 修改按钮监听
+            } else if(obj.event === 'edit'){
+            x_admin_show1('修改用户','./admin-edit.html',data.id);
+        }
+    });
+});
+</script>
+</body>
+</html>

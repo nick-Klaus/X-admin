@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+  
+  <head>
+    <meta charset="UTF-8">
+    <title>欢迎页面-X-admin2.0</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="./../../css/font.css">
+    <link rel="stylesheet" href="./../../css/xadmin.css">
+    <script type="text/javascript" src="./../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="./../../lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./../../js/xadmin.js"></script>
+  </head>
+  
+  <body>
+<div class="x-body">
+    <form class="layui-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label">头像</label>
+            <div class="layui-input-inline">
+                <input type="text" name="head_url" lay-verify="required" id="inputimgurl" placeholder="图片地址" value="" class="layui-input">
+            </div>
+            <div class="layui-input-inline">
+                <div class="layui-upload-list" style="margin:0">
+                    <img src="./../../images/default.jpg" id="srcimgurl" class="layui-upload-img">
+                </div>
+            </div>
+            <div class="layui-input-inline layui-btn-container" style="width: auto;">
+                <a class="layui-btn layui-btn-primary" id="editimg">修改图片</a >
+            </div>
+            <div class="layui-form-mid layui-word-aux">头像的尺寸限定150x150px,大小在50kb以内</div>
+        </div>
+
+        <div class="layui-form-item">
+            <label for="username" class="layui-form-label">
+                <span class="x-red">*</span>姓名
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" id="username" name="username" required="" lay-verify="required"
+              autocomplete="off" class="layui-input">  
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label for="phone" class="layui-form-label">
+                <span class="x-red">*</span>手机
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" id="phone" name="phone" required="" lay-verify="phone"
+              autocomplete="off" class="layui-input">
+            </div>
+            <div class="layui-form-mid layui-word-aux">
+                <span class="x-red">*</span>将会成为您唯一的登入名
+            </div>
+        </div>
+       <!--  <div class="layui-form-item">
+            <label for="L_email" class="layui-form-label">
+                <span class="x-red">*</span>邮箱
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" id="L_email" name="e_mail" required="" lay-verify="email"
+              autocomplete="off" class="layui-input">
+            </div>
+        </div> -->
+        <div class="layui-form-item">
+            <label class="layui-form-label"><span class="x-red">*</span>性别</label>
+            <div class="layui-input-block">
+                <input type="radio" name="sex" value="0" lay-skin="primary" title="女" checked="">
+                <input type="radio" name="sex" value="1"  lay-skin="primary" title="男">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label"><span class="x-red">*</span>角色</label>
+            <div class="layui-input-block">
+                <input type="radio" name="role_id" value="0" lay-skin="primary" title="超级管理员" checked="">
+                <input type="radio" name="role_id" value="1" lay-skin="primary" title="编辑人员">
+                <input type="radio" name="role_id" value="2" lay-skin="primary" title="宣传人员" >
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label for="L_pass" class="layui-form-label">
+                <span class="x-red">*</span>密码
+            </label>
+            <div class="layui-input-inline">
+                <input type="password" id="L_pass" name="password1" required="" lay-verify="pass"
+              autocomplete="off" class="layui-input">
+            </div>
+            <div class="layui-form-mid layui-word-aux">
+                6到16个字符
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label for="L_repass" class="layui-form-label">
+                <span class="x-red">*</span>确认密码
+            </label>
+            <div class="layui-input-inline">
+                <input type="password" id="L_repass" name="password2" required="" lay-verify="repass"
+              autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <!-- <div class="layui-form-item">
+            <label for="address" class="layui-form-label">
+                <span class="x-red">*</span>地址
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" id="address" name="address" 
+              autocomplete="off" class="layui-input">
+            </div>
+        </div> -->
+        <div class="layui-form-item">
+            <label class="layui-form-label"><span class="x-red">*</span>状态</label>
+            <div class="layui-input-block">
+                <input type="radio" name="status" value="1" lay-skin="primary" title="启用" checked="">
+                <input type="radio" name="status" value="0"  lay-skin="primary" title="禁用">
+            </div>
+        </div>
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">备注</label>
+            <div class="layui-input-block">
+            <textarea placeholder="请输入内容" name="remark" class="layui-textarea" style="width: 300px"></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label for="L_repass" class="layui-form-label">
+            </label>
+            <button  class="layui-btn" lay-filter="add" lay-submit="">
+                增加
+            </button>
+        </div>
+    </form>
+</div>
+<script>
+    layui.use(['form','layer'], function(){
+        $ = layui.jquery;
+        var form = layui.form
+        ,layer = layui.layer;
+        // 获取缓存的token
+        var token = sessionStorage.getItem('auth_user_token');
+        // if( token == null ){
+        //     layer.msg('你还未登陆！',{time: 500},function(){
+        //         location.href = './login.html';
+        //     });
+        // }
+        var adminurl = apiUrl+'Rbac/crateUser';
+        // console.log( adminurl )
+        // 自定义验证规则
+        form.verify({
+            pass: [/(.+){6,12}$/, '密码必须6到12位']
+            ,repass: function(value){
+                if($('#L_pass').val()!=$('#L_repass').val()){
+                    return '两次密码不一致';
+                }
+            }
+        });
+
+        // 监听提交
+        form.on('submit(add)', function(data){
+            var parma = data.field
+            parma.token = token;
+            $.post(adminurl,parma,function(json){
+                if( json.code === 0 ){
+                    layer.msg("增加成功", {icon: 6,time: 500,},function(){
+                        setTimeout(function() {
+                            parent.location.reload(); 
+                        },200);
+                    });
+                }else{
+                    layer.msg(json.msg, {icon: 5});
+                }
+            });
+            return false;
+        });
+    });
+
+    layui.config({
+        base: './../../lib/cropper/' //layui自定义layui组件目录
+    }).use(['form','croppers'], function () {
+        var $ = layui.jquery
+            ,form = layui.form
+            ,croppers = layui.croppers
+            ,layer= layui.layer;
+        var adminurl1 = imgUrl+'uploads/';    
+        //创建一个头像上传组件
+        croppers.render({
+            elem: '#editimg'
+            ,saveW:150     //保存宽度
+            ,saveH:150
+            ,mark:1/1    //选取比例
+            ,area:'900px'  //弹窗宽度
+            ,url: apiUrl+'Rbac/uploadImg'  //图片上传接口返回和（layui 的upload 模块）返回的JOSN一样
+            ,done: function(url){ //上传完毕回调
+                console.log( 1111,adminurl1 );
+                $("#inputimgurl").val(url);
+                $("#srcimgurl").attr('src',adminurl1+url);
+            }
+        });
+
+    });
+</script>
+</body>
+</html>
