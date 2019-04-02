@@ -15,130 +15,145 @@
     <script src="./lib/layui/layui.js" charset="utf-8"></script>
     <script src="./js/gt.js" charset="utf-8"></script>
     <!-- <script type="text/javascript" src="./js/xadmin.js"></script> -->
+    <script type="text/javascript" src="./js/vue.js"></script>
+    <script type="text/javascript" src="./js/vue-resource.min.js"></script>
+    <script src="./js/gt.js" charset="utf-8"></script>
+    <!-- <script type="text/javascript" src="./js/xadmin.js"></script> -->
 
 </head>
 <body class="login-bg">
-    
-    <div class="login">
-        <div class="message">管理登录</div>
+
+    <div id='x-body' class="login">
+        <div class="message">ZYZ-追银族 管理登录</div>
         <div id="darkbannerwrap"></div>
-        
         <form method="post" class="layui-form" >
-            <input name="phone" placeholder="电话号码"  type="text" lay-verify="required" class="layui-input" >
+            <input v-model="usercode" placeholder="用户编号"  type="text" lay-verify="required" class="layui-input" >
             <hr class="hr15">
-            <input name="password" lay-verify="required" placeholder="密码"  type="password" class="layui-input">
+            <input v-model="password" lay-verify="required" placeholder="密码"  type="password" class="layui-input">
             <hr class="hr15">
             <div id="captcha">
                 <div id="loading-tip">加载中，请稍后...</div>
             </div>
             <hr class="hr15" >
-            <input value="登录" lay-submit  lay-filter="login" id="submit-tip"  style="width:100%;" type="submit">
+            <!-- <input value="登录" lay-submit  lay-filter="login" id="submit-tip" @click='login()'  style="width:100%;" type="submit"> -->
+            <a class="layui-btn layui-btn-disabled"  id='dis' style="width:100%;margin-left: 0px;" >登录</a>
+            <a class="layui-btn layui-btn-lg" @click='login()' id='dison' style="width:100%;display:none;margin-left: 0px;" >登录</a>
             <hr class="hr20" >
         </form>
     </div>
 
-    <script>
-        $(function  () {
-            layui.use('form', function(){
-                $ = layui.jquery;
-                var form = layui.form;
-                var loginurl = 'http://www.api.nick.com/nick_admin/public/api/';
-                // 获取连接上的参数
-                // 在登录过期以后用户重新登录可以直接跳转到用户停留的页面
-                var GetQueryString = function(name)
-                {
-                    var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
-                    var r = window.location.search.substr(1).match(reg);
-                    if(r!=null)return  unescape(r[2]); return null;
-                }
-                var _location =  GetQueryString("name");
-                // 渲染验证图片的方法
-                var handler = function (captchaObj) {
-
-                    // DOM 准备好后，隐藏 #loading-tip 元素
-                    // 仅作示例用，用您适合的方式隐藏即可
-                    captchaObj.onReady(function () {
-                        document.getElementById('loading-tip').style.display = 'none';
-                        $("#submit-tip").attr("disabled",true); // 
-                    });
-
-                    // 出错啦，可以提醒用户稍后进行重试
-                    captchaObj.onError(function () {
-                        // 调用该接口进行重置
-                         layer.msg('页面出错，请刷新页面。。。', {icon: 5});
-                    });
-
-                    captchaObj.onSuccess(function () {
-                        var result = captchaObj.getValidate();
-                        // api2 查询验证是否成功
-                        $.ajax({
-                            url: loginurl+"Rbac/apiVerif2",
-                            type: "post",
-                            data: {
-                                geetest_challenge: result.geetest_challenge,
-                                geetest_validate: result.geetest_validate,
-                                geetest_seccode: result.geetest_seccode,
-                                // 其他服务端需要的数据，比如登录时的用户名和密码
-                            },
-                            dataType: "json",
-                            success: function (data) {
-                                // console.log( 1111,data )
-                                if( data.code === 0 ){
-                                    $("#submit-tip").attr("disabled",false);
-                                }else{
-                                    layer.msg('验证失败', {icon: 5});
-                                    captchaObj.reset(); // 调用该接口进行重置
-                                }
-                            }
-                        })
-                    })
-
-                    // 将验证码加到id为captcha的元素里
-                    captchaObj.appendTo("#captcha");
-                 };
-                // api1 获取流水标识并设置状态码 
+<script>
+var apiUrl1 = 'http://api.laravel.com/zyzxiaocx/public/api/xiaocxAdmin/';
+$(function  () {
+    layui.use('form', function(){
+        $ = layui.jquery;
+        var form = layui.form;
+         // 渲染验证图片的方法
+        var handler = function (captchaObj) {
+            // DOM 准备好后，隐藏 #loading-tip 元素
+            // 仅作示例用，用您适合的方式隐藏即可
+            captchaObj.onReady(function () {
+                document.getElementById('loading-tip').style.display = 'none';
+                $("#submit-tip").attr("disabled",true); // 
+            });
+            // 出错啦，可以提醒用户稍后进行重试
+            captchaObj.onError(function () {
+                // 调用该接口进行重置
+                 layer.msg('页面出错，请刷新页面。。。', {icon: 5});
+            });
+            captchaObj.onSuccess(function () {
+                var result = captchaObj.getValidate();
+                // api2 查询验证是否成功
                 $.ajax({
-                    url: loginurl+"Rbac/apiVerif1",
-                    type: "get",
+                    url: apiUrl1+'apiVerif2',
+                    type: "post",
+                    data: {
+                        geetest_challenge: result.geetest_challenge,
+                        geetest_validate: result.geetest_validate,
+                        geetest_seccode: result.geetest_seccode,
+                        // 其他服务端需要的数据，比如登录时的用户名和密码
+                    },
                     dataType: "json",
                     success: function (data) {
-                        // console.log(11111111,data)
-                        //请检测data的数据结构， 保证data.gt, data.challenge, data.success有值
-                        initGeetest({
-                            gt: data.gt,
-                            challenge: data.challenge,
-                            product: "float", // 产品形式
-                            offline: !data.success
-                        }, handler);
+                        // console.log( 1111,data )
+                        if( data.code === 0 ){
+                           //  $("#submit-tip").attr("disabled",false);
+                            $("#dis").css("display",'none');
+                            $("#dison").css("display",'');
+                        }else{
+                            layer.msg('验证失败', {icon: 5});
+                            captchaObj.reset(); // 调用该接口进行重置
+                        }
                     }
                 })
+            })
 
-                form.on('submit(login)', function(data){
-                    let prama = data.field
-                    if( prama.geetest_validate==="" ){
-                        layer.msg('请点击验证条。。。', {icon: 5});
-                        return false;
-                    }
-                    $.post(loginurl+'Rbac/login',prama,function(json){
-                        if( json.code === 0 ){
-                            layer.msg("登录成功", {icon: 6,time: 500},function(){
-                                sessionStorage.setItem('auth_user_token',json.data);
-                                if(_location==null){
-                                    location.href='index.html';
-                                }else{
-                                    location.href= _location; 
-                                }
-                            });
-                        }else{
-                            layer.msg(json.error_msg, {icon: 5});
-                            return false;
-                        }
-                    });
-                    return false;
-                });
-        
-            });
+            // 将验证码加到id为captcha的元素里
+            captchaObj.appendTo("#captcha");
+         };
+        // api1 获取流水标识并设置状态码 
+        $.ajax({
+            url: apiUrl1+'apiVerif1',
+            type: "get",
+            dataType: "json",
+            success: function (data) {
+                //请检测data的数据结构， 保证data.gt, data.challenge, data.success有值
+                initGeetest({
+                    gt: data.gt,
+                    challenge: data.challenge,
+                    product: "float", // 产品形式
+                    offline: !data.success
+                }, handler);
+            }
         })
-    </script>
+    });
+})
+
+var app = new Vue({
+    el: '#x-body',
+    data: {
+        password: "",
+        usercode: "",
+    },
+    methods:{
+        // 点击登录
+        login:function(){
+            let _this = this;
+            if( _this.usercode == "" ){
+                layer.msg('请输入编号');
+                return ;
+            }
+            if( _this.password == "" ){
+                layer.msg('请输入密码');
+                return ;
+            }
+            let lod = layer.load();
+            let url = apiUrl1+'login';
+            let data = {
+                password: _this.password,
+                usercode: _this.usercode,
+            };
+            _this.$http.post(url, data ,{emulateJSON:true}).then(function(response){
+                let result = response.body;
+                layer.close(lod);
+                if( result.code !== 0 ){
+                    layer.msg( result.msg );
+                    return ;
+                }
+                sessionStorage.setItem('auth_token',result.data);
+                layer.msg( result.msg );
+                setTimeout(function(){
+                    location.href='./index.html';
+                },1000)
+            });
+        },
+    },
+    mounted(){
+        let _this = this;
+        // console.log(12313)
+        // location.href = './login.html';
+    },
+}); 
+</script>
 </body>
 </html>

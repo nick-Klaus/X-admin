@@ -127,7 +127,7 @@ layui.use(['form','layer'], function(){
     ,layer = layui.layer;
     setTimeout(function() {
         form.render();
-    },100);
+    },500);
     var token = sessionStorage.getItem('auth_user_token');
     var adminurl = apiUrl+'Rbac/updateUser';
 

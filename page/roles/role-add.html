@@ -24,7 +24,7 @@
                 <span class="x-red">*</span>角色名
             </label>
             <div class="layui-input-inline">
-                <input type="text" id="name" name="name" required="" lay-verify="required"
+                <input type="text" id="name" name="title" required="" lay-verify="required"
                 autocomplete="off" class="layui-input">
             </div>
         </div>
@@ -51,8 +51,8 @@
             form.render();
         },80);
         // 获取缓存的token
-        var token = sessionStorage.getItem('auth_user_token');
-        var adminurl = apiUrl+'Rbac/creatRole';
+        var token = sessionStorage.getItem('auth_token');
+        var adminurl = apiUrl+'creatRole';
         //自定义验证规则
         form.verify({
             nikename: function(value){
@@ -64,7 +64,7 @@
       //监听提交
         form.on('submit(add)', function(data){
             var parma = data.field
-            parma.token  = token;
+            parma.auth_token  = token;
             $.post(adminurl,parma,function(json){
                 if( json.code === 0 ){
                     layer.msg("增加成功", {icon: 6,time:1000},function(){

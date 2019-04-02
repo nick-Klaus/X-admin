@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+  
+  <head>
+    <meta charset="UTF-8">
+    <title>欢迎页面-X-admin2.0</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="./../../css/font.css">
+    <link rel="stylesheet" href="./../../css/xadmin.css">
+    <script type="text/javascript" src="./../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="./../../lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./../../js/xadmin.js"></script>
+    <script type="text/javascript" src="./../../js/vue.js"></script>
+    <script type="text/javascript" src="./../../js/vue-resource.min.js"></script>
+  </head>
+  
+  <body>
+<div class="x-body" id="x-body">
+    <form class="layui-form">
+        <div class="layui-form-item">
+            <label for="name" class="layui-form-label">
+                <span class="x-red">*</span>姓名
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" id="name" name="username" required="" lay-verify="required"
+              autocomplete="off" class="layui-input" v-model='data.username' disabled="disabled">
+              <input type="hidden" name="id"  v-model='data.id'>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label for="address" class="layui-form-label">
+                <span class="x-red">*</span>电话
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" id="address" name="phone" required="" lay-verify="required"
+                       autocomplete="off" class="layui-input" v-model='data.phone' disabled="disabled">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label"><span class="x-red">*</span>访问状态</label>
+            <div class="layui-input-block">
+                <input type="radio" name="visit" value="0"  lay-skin="primary" title="未访问" :checked="data.visit=='0'">
+                <input type="radio" name="visit" value="1" lay-skin="primary" title="已访问" :checked="data.visit=='1'" >
+            </div>
+        </div>
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">访问备注</label>
+            <div class="layui-input-block">
+            <textarea placeholder="请输入内容" name="remark" class="layui-textarea" style="width: 300px" v-model='data.remark'></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label for="L_repass" class="layui-form-label">
+            </label>
+            <button class="layui-btn" lay-submit="" lay-filter="add">提交</button>
+        </div>
+    </form>
+</div>
+<script>
+layui.use(['form', 'layedit', 'laydate','table','jquery'], function(){
+    var table = layui.table;
+    var form = layui.form
+        ,layer = layui.layer
+        ,layedit = layui.layedit
+        ,laydate = layui.laydate;
+    var $= layui.jquery;
+    //监听提交
+    form.on('submit(add)', function(data){
+        var parma = data.field
+        parma.auth_token = sessionStorage.getItem('auth_token');
+        $.post(apiUrl+'editWechatBespeak',parma,function(json){
+            if( json.code === 0 ){
+                layer.msg("修改成功", {icon: 6},function(){
+                    parent.location.reload();
+                });
+            }else{
+                layer.msg(json.msg, {icon: 5});
+            }
+        });
+        return false;
+    });
+})
+var app = new Vue({
+    el: '#x-body',
+    data: {
+        data: {},
+        auth_token: sessionStorage.getItem('auth_token')
+    },
+    methods:{
+        getWechatBespeak:function(edit_id){
+            var _this = this;
+            var url = apiUrl+'getWechatBespeak?id='+edit_id+'&auth_token='+_this.auth_token;
+            var data = {
+                // id:this.edit_id,
+                // token:sessionStorage.getItem('auth_user_token')
+            };
+            _this.$http.get(url, data ,{emulateJSON:true}).then(function(response){
+                var result = response.body;
+                if( result.code !== 0 ){
+                    layer.msg(result.msg,{icon:2});
+                }
+                _this.data = result.data
+                setTimeout(function () {
+                    layui.form.render('radio');
+                },100)
+            }, function(response){
+                if( response.status == 408 ){
+                    layer.msg(response.statusText,{icon:0});
+                } else {
+                    layer.msg('出错了',{icon:2});
+                }
+            });
+        },
+    },
+    mounted(){
+        function GetQueryString(name)
+        {
+            var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+            var r = window.location.search.substr(1).match(reg);
+            if(r!=null)return  unescape(r[2]); return null;
+        }
+        this.getWechatBespeak( GetQueryString("id") )
+    }
+});
+
+
+</script>
+</body>
+</html>

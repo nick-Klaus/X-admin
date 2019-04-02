@@ -1,6 +1,6 @@
 var jsonApiUrl = 'http://www.yeyuqian.top/tp_auth/';
-var apiUrl = 'http://www.api.nick.com/nick_admin/public/api/';
-var imgUrl = 'http://www.api.nick.com/nick_admin/storage/app/public/';
+var apiUrl = 'http://api.laravel.com/zyzxiaocx/public/api/xiaocxAdmin/';
+//var imgUrl = 'http://api.laravel.com/nick_admin/storage/app/public/';
 $(function () {
     //加载弹出层
     layui.use(['form','element','layer'],
@@ -8,10 +8,10 @@ $(function () {
         layer = layui.layer;
         element = layui.element;
         
-        var token = sessionStorage.getItem('auth_user_token');
+        var token = sessionStorage.getItem('auth_token');
         if( token === null ){
             layer.msg('你还未登陆！',{time: 500},function(){
-                location.href = 'http://www.api.nick.com/back_admin/login.html';
+                location.href = './login.html';
             });
         }
     });
@@ -98,8 +98,8 @@ $(function () {
 
     //左侧菜单效果
     // $('#content').bind("click",function(event){
-    $('.left-nav #nav li').click(function (event) {
-
+    $(document).on('click','.left-nav #nav li',function (event) {
+        
         if($(this).children('.sub-menu').length){
             if($(this).hasClass('open')){
                 $(this).removeClass('open');

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+  
+  <head>
+    <meta charset="UTF-8">
+    <title>欢迎页面-X-admin2.0</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="./../../css/font.css">
+    <link rel="stylesheet" href="./../../css/xadmin.css">
+    <script type="text/javascript" src="./../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="./../../lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./../../js/xadmin.js"></script>
+    <script type="text/javascript" src="./../../js/vue.js"></script>
+    <script type="text/javascript" src="./../../js/vue-resource.min.js"></script>
+  </head>
+  
+  <body>
+<div class="x-body" id="x-body">
+    <form class="layui-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label"><span class="x-red">*</span>顶级菜单</label>
+            <div class="layui-input-inline">
+                <select name="top_id"  lay-search=""  >
+                    <option value="">直接选择或搜索选择</option>
+                    <option  v-for="item in topMenus" :value="item.id" >{{item.title}}</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label for="name" class="layui-form-label">
+                <span class="x-red">*</span>菜单名称
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" id="name" name="title" required="" lay-verify="required"
+              autocomplete="off" class="layui-input"  >
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label for="address" class="layui-form-label">
+                <span class="x-red">*</span>菜单地址
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" id="address" name="href" required="" lay-verify="required"
+                       autocomplete="off" class="layui-input" >
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label"><span class="x-red">*</span>状态</label>
+            <div class="layui-input-block">
+                <input type="radio" name="status" value="1" lay-skin="primary" title="启用" checked="" >
+                <input type="radio" name="status" value="0"  lay-skin="primary" title="禁用" >
+            </div>
+        </div>
+        <!-- <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">备注</label>
+            <div class="layui-input-block">
+            <textarea placeholder="请输入内容" name="remark" class="layui-textarea" style="width: 300px" ></textarea>
+            </div>
+        </div> -->
+        <div class="layui-form-item">
+            <label for="L_repass" class="layui-form-label">
+            </label>
+            <button class="layui-btn" lay-submit="" lay-filter="add">添加</button>
+        </div>
+    </form>
+</div>
+<script>
+layui.use(['form', 'layedit', 'laydate','table','jquery'], function(){
+    var table = layui.table;
+    var form = layui.form
+        ,layer = layui.layer
+        ,layedit = layui.layedit
+        ,laydate = layui.laydate;
+    var $= layui.jquery;
+    //监听提交
+    form.on('submit(add)', function(data){
+        var parma = data.field
+        parma.auth_token = sessionStorage.getItem('auth_token');
+        $.post(apiUrl+'createMenu',parma,function(json){
+            if( json.code === 0 ){
+                layer.msg("创建成功", {icon: 6},function(){
+                    parent.location.reload();
+                });
+            }else{
+                layer.msg(json.msg, {icon: 5});
+            }
+        });
+        return false;
+    });
+})
+var app = new Vue({
+    el: '#x-body',
+    data: {
+        userData: {},
+        topMenus:{},
+        create:{pid:0,name:'',address:'',status:'',remark:''},
+        auth_token: sessionStorage.getItem('auth_token')
+    },
+    methods:{
+        getUserdata:function(edit_id){
+            var _this = this;
+            console.log('test');
+            var url = apiUrl+'Rbac/checkUser/'+edit_id;
+            var data = {
+                // id:this.edit_id,
+                // token:sessionStorage.getItem('auth_user_token')
+            };
+            _this.$http.get(url, data ,{emulateJSON:true}).then(function(response){
+                var result = response.body;
+                if( result.code !== 0 ){
+                    layer.msg(result.msg,{icon:2});
+                }
+                _this.userData = result.data
+            }, function(response){
+                if( response.status == 408 ){
+                    layer.msg(response.statusText,{icon:0});
+                } else {
+                    layer.msg('出错了',{icon:2});
+                }
+            });
+        },
+        // 获取顶级菜单 pid= 0
+        checkTopMenus:function(){
+            let _this = this
+            let url = apiUrl+'checkTopMenus?auth_token='+_this.auth_token;
+            let data = {
+                // id:this.edit_id,
+                // token:sessionStorage.getItem('auth_user_token')
+            };
+            _this.$http.get(url, data ,{emulateJSON:true}).then(function(response){
+                var result = response.body;
+                _this.topMenus = result.data
+                setTimeout(function(){
+                    layui.form.render('select');
+                },100)
+            },function(response){
+                layer.msg('出错了',{icon:2});
+            });
+        },
+    },
+    mounted(){
+        this.checkTopMenus()
+    }
+});
+
+
+</script>
+</body>
+</html>

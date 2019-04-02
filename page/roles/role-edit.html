@@ -29,16 +29,16 @@
                     <span class="x-red">*</span>角色名
                 </label>
                 <div class="layui-input-inline">
-                    <input type="text" id="name" name="name" required="" lay-verify="required"
-                    autocomplete="off" class="layui-input" v-model='roleData.name'>
+                    <input type="text" id="name" name="title" required="" lay-verify="required"
+                    autocomplete="off" class="layui-input" v-model='roleData.title'>
                     <input type="hidden" name="id" v-model='roleData.id'>
                 </div>
             </div>
             <div class="layui-form-item">
                 <label class="layui-form-label"><span class="x-red">*</span>状态</label>
                 <div class="layui-input-block">
-                    <input type="radio" name="status" value="1" lay-skin="primary" title="启用" :checked="roleData.status==='1'">
-                    <input type="radio" name="status" value="0"  lay-skin="primary" title="禁用" :checked="roleData.status==='0'">
+                    <input type="radio" name="status" value="1" lay-skin="primary" title="启用" :checked="roleData.status=='1'">
+                    <input type="radio" name="status" value="0"  lay-skin="primary"  title="禁用" :checked="roleData.status=='0'">
                 </div>
             </div>
            
@@ -51,7 +51,7 @@
                 </div>
             </div>
             <div class="layui-form-item">
-            <button class="layui-btn" lay-submit="" lay-filter="add">增加</button>
+            <button class="layui-btn" lay-submit="" lay-filter="add">修改</button>
           </div>
         </form>
 </div>
@@ -62,25 +62,27 @@ var app = new Vue({
     data: {
         message: '',
         edit_id: '',
-        roleData: {}
+        roleData: {},
+        auth_token: sessionStorage.getItem('auth_token')
     },
     methods:{
         getRoledata:function($id){
             var _this = this;
             console.log('test');
-            var url = apiUrl+'Rbac/checkRole/'+$id;
+            var url = apiUrl+'getRole?id='+$id+'&auth_token='+_this.auth_token;
             var data = {
                 // id: this.edit_id,
                 // token:sessionStorage.getItem('auth_user_token')
             };
             _this.$http.get(url, data ,{emulateJSON:true}).then(function(response){
-
                 var result = response.body;
                 if(result.code !== 0){
                     layer.msg(result.error_msg,{icon:0});
                 }
                 _this.roleData  = result.data;
-                console.log( 11111,_this.roleData )
+                setTimeout(function () {
+                    layui.form.render('radio');
+                },100)
             }, function(response){
                 if( response.status == 408 ){
                     layer.msg(response.statusText,{icon:0});
@@ -115,14 +117,11 @@ layui.use(['form','layer'], function(){
             }
         }
     });
-    setTimeout(function() {
-        form.render();
-    },100);
     //监听提交
     form.on('submit(add)', function(data){
         var parma = data.field
-        parma.token = sessionStorage.getItem('auth_user_token');
-        $.post(apiUrl+'Rbac/updateRole',parma,function(json){
+        parma.auth_token = sessionStorage.getItem('auth_token');
+        $.post(apiUrl+'updateRole',parma,function(json){
             if( json.code === 0 ){
                 layer.msg("修改成功", {icon: 6},function(){
                     parent.location.reload(); 

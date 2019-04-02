@@ -18,7 +18,7 @@
     <span class="layui-breadcrumb">
         <a href="">首页</a>
         <a href="">演示</a>
-        <a><cite>角色列表</cite></a>
+        <a><cite>导航元素</cite></a>
     </span>
     <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right" href="javascript:location.replace(location.href);" title="刷新">
     <i class="layui-icon" style="line-height:30px">ဂ</i></a>
@@ -26,21 +26,20 @@
 <div class="x-body" id="x-body">
     <div class="layui-row">
         <form class="layui-form layui-col-md12 x-so">
-            <input type="text" name="name"  placeholder="请输入用角色名" autocomplete="off" class="layui-input">
+            <input type="text" name="title"  placeholder="请输入菜单名称" autocomplete="off" class="layui-input">
             <button class="layui-btn"  lay-submit="" lay-filter="demo1"><i class="layui-icon">&#xe615;</i></button>
         </form>
     </div>
     <xblock>
-        <!--<div class="layui-btn-group demoTable">-->
-            <!--<button class="layui-btn layui-btn-danger" data-type="getCheckData" ><i class="layui-icon"></i>批量删除</button>-->
-        <!--</div>-->
-        <button class="layui-btn" onclick="x_admin_show('添加角色','./role-add.html')"><i class="layui-icon"></i>添加</button>
+        <div class="layui-btn-group demoTable">
+            <!-- <button class="layui-btn layui-btn-danger" data-type="getCheckData" ><i class="layui-icon"></i>批量删除</button> -->
+        </div>
+        <button class="layui-btn" onclick="x_admin_show('添加菜单','./create.html')"><i class="layui-icon"></i>添加</button>
     </xblock>
     <table class="layui-hide" id="LAY_table_user"  lay-filter="demo"></table> 
 </div>
+<!-- <a class="layui-btn layui-btn-xs"   lay-event="edit">编辑</a> -->
 <script type="text/html" id="barDemo">
-    <a class="layui-btn layui-btn-xs layui-btn-normal" > 权限分配</a>
-    <a class="layui-btn layui-btn-xs"   lay-event="edit">编辑</a>
     <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
 </script>
 <script src="./../../lib/layui/layui.js" charset="utf-8"></script>
@@ -63,7 +62,7 @@ layui.use(['form', 'layedit', 'laydate','table','jquery'], function(){
         elem: '#end'
     });
     // 获取列表的接口地址
-    var adminurl = apiUrl;
+    var adminurl = apiUrl
     var  x_admin_show1 = function (title,url,value,w,h){
         if (title == null || title == '') {
             title=false;
@@ -94,12 +93,20 @@ layui.use(['form', 'layedit', 'laydate','table','jquery'], function(){
     // 渲染数据表格
     var tableIns = table.render({
         elem: '#LAY_table_user'
-        ,url: adminurl+'getRoles'
-        ,method:'get'
+        ,url: adminurl+'getMenus'
+        ,method:'post'
         ,cols: [[
             {checkbox: true, fixed: true ,toolbar: '#bar_Demo'}
             ,{field:'id', title: 'ID', width:80, sort: true, fixed: true}
-            ,{field:'title', title: '角色'}
+            ,{field:'title', title: '菜单名称',templet: function(d){
+                // 重新设置表格的值
+                if( d.top_id === 0 ){
+                    return  d.title;
+                }else{
+                    return  '|－－－'+d.title;
+                }
+            }}
+            ,{field:'href', title: '菜单地址'}
             ,{field:'status', title: '状态', align:'center',sort: true,templet: function(d){
                 // 重新设置表格的值
                 if( d.status === '1' ){
@@ -108,12 +115,11 @@ layui.use(['form', 'layedit', 'laydate','table','jquery'], function(){
                     return  '<span class="layui-btn layui-btn-xs layui-btn-danger">未启用</span>';
                 }
             }}
-            ,{field:'created_at', title: '创建时间'}
             ,{fixed: 'right',title: '操作', width:178, align:'center', toolbar: '#barDemo'}
         ]]
         ,where: { //设定异步数据接口的额外参数，任意设
-            auth_token:token
-          }
+            auth_token: sessionStorage.getItem('auth_token')
+        }
         ,done: function(res, curr, count){
             layer.closeAll(); //疯狂模式，关闭所有层
             // console.log(111,res)
@@ -129,62 +135,60 @@ layui.use(['form', 'layedit', 'laydate','table','jquery'], function(){
         }
         ,id:'idTest'
         ,page: false
-        ,height: 'full-20'
+        ,height: 472
     });
 
     // 查询后重新渲染表格数据
     form.on('submit(demo1)', function(data){
-    	var index = layer.load(1, {
-	      shade: [0.1,'#fff'] //0.1透明度的白色背景
-	    });
         var parma = data.field
-        if( parma.name === null || parma.name === '' ){
-        	return false;
-        }
         parma.auth_token  = token;
-        $.get(adminurl+'getRoles',parma,function(json){
+        console.log(7777, parma )
+        if( parma.name === ""){
+            return false;
+        }
+        console.log( parma )
+        $.post(adminurl+'getMenus',parma,function(json){
             if( json.code === 0 ){
                 tableIns.reload({
                     where:parma
-                    ,page: {
-                        curr: 1 //重新从第 1 页开始
-                    }
-                });
-               layer.closeAll(); //疯狂模式，关闭所有层
+                    // ,page: {
+                    //     curr: 1 //重新从第 1 页开始
+                    // }
+              });
             }else{
-                layer.msg(json.error_msg, {icon: 5});
+                layer.msg(json.msg, {icon: 5});
             }
         });
         return false;
     });
     // 获取复选框的数据
-    // var $ = layui.$, active = {
-    //     getCheckData: function(){ //获取选中数据
-    //         var checkStatus = table.checkStatus('idTest')
-    //         ,data = checkStatus.data;
-    //         var delArr = [];
-    //         if( data.length > 0 ){
-    //             for(var key in data){
-    //                 delArr.push(data[key].id);
-    //             }
-    //             var parma = {
-    //                 ids: delArr,
-    //                 token: token
-    //             };
-    //             $.post(adminurl+'delRole',parma,function(json){
-    //                 if( json.code === 0 ){
-    //                     layer.msg('删除成功', {icon: 6},function(){
-    //                         // location.reload();
-    //                         tableIns.reload()
-    //                     });
-    //                 }else{
-    //                     layer.msg(json.msg, {icon: 5});
-    //                 }
-    //             });
-    //             return false;
-    //         }
-    //     }
-    // };
+    var $ = layui.$, active = {
+        getCheckData: function(){ //获取选中数据
+            var checkStatus = table.checkStatus('idTest')
+            ,data = checkStatus.data;
+            var delArr = [];
+            if( data.length > 0 ){
+                for(var key in data){
+                    delArr.push(data[key].id);
+                }
+                var parma = {
+                    ids: delArr,
+                    token: token
+                };
+                $.post(adminurl+'delUsers',parma,function(json){
+                    if( json.code === 0 ){
+                        layer.msg('删除成功', {icon: 6},function(){
+                            // location.reload();
+                            tableIns.reload()
+                        });
+                    }else{
+                        layer.msg(json.msg, {icon: 5});
+                    }
+                });
+                return false;
+            }
+        }
+    };
     // 获取复选框的数据
     $('.demoTable .layui-btn').on('click', function(){
         var type = $(this).data('type');
@@ -197,9 +201,10 @@ layui.use(['form', 'layedit', 'laydate','table','jquery'], function(){
         // 删除按钮监听
         if(obj.event === 'del'){
             layer.confirm('真的要删除吗？', function(index){
-                var delurl =adminurl+'delRole?id='+data.id+'&auth_token='+token;
+                var delurl = adminurl+'delMenu?id='+data.id+'&auth_token='+token;
                 // var parma = {id:,token:token};
                 var parma = {}
+                
                 $.get(delurl,parma,function(json){
                     if( json.code === 0 ){
                         obj.del()
@@ -211,7 +216,7 @@ layui.use(['form', 'layedit', 'laydate','table','jquery'], function(){
             });
             // 修改按钮监听
             } else if(obj.event === 'edit'){
-            x_admin_show1('修改角色','./role-edit.html',data.id);
+            x_admin_show1('修改用户','./admin-edit.html',data.id);
         }
     });
 });
